@@ -9,8 +9,11 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
+
+import static java.util.Collections.EMPTY_MAP;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Uwc9Application.class)
@@ -23,23 +26,21 @@ public class Uwc9ApplicationTests {
 	GitHttpRequest request;
 
 	@Autowired
-	StarsFabrica fabrica;
+	GitHubProperties properties;
+
+	@Autowired
+	StarsFabric fabrica;
 
 	@Test
 	public void contextLoads() throws Exception {
-		String repo = "5BRAINS/resumein";
+		String repo = "docker-library/php";
 
-		Response r = request.sendGet(request.getStarsRequestUrl.apply(repo), Collections.EMPTY_MAP, Collections.singletonMap("Accept", "application/vnd.github.v3.star+json"));
+		GitRepo starsInfo = fabrica.getPeriodStarsInfo(Period.WEEK, repo);
+		System.out.println(starsInfo.toString());
+		logger.info(starsInfo.getStarsInfo().keySet().size());
+		System.out.println("non parse stars" + starsInfo.getNonParseStars());
 
-		GitRepo gitRepo = new GitRepo(repo);
-
-		fabrica.updateRepoInfo(r, gitRepo);
-		for (Date d : gitRepo.getStarsInfo().keySet()){
-			logger.info(d);
-			logger.info(gitRepo.getStarsInfo().get(d));
-		}
-		Assert.assertTrue(gitRepo.getStarsInfo().keySet().size() != 0);
-
+		Assert.assertTrue(starsInfo.getStarsInfo().keySet().size() > 0);
 	}
 
 }
